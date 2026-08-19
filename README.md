@@ -45,11 +45,11 @@ The training interface contains 10 levels.
 1. Enter the login in the training interface.
 
 For each level:
-  2. Analyze the network diagram and the objectives.
-  3. Modify the available configuration fields.
-  4. Use **Check again** to verify the configuration.
-  5. When the level is successfully completed, use **Get my config** to export the configuration.
-  6. Save the exported configuration file in the repository before moving to the next level.
+ * 2. Analyze the network diagram and the objectives.
+ * 3. Modify the available configuration fields.
+ * 4. Use **Check again** to verify the configuration.
+ * 5. When the level is successfully completed, use **Get my config** to export the configuration.
+ * 6. Save the exported configuration file in the repository before moving to the next level.
 
 The logs displayed at the bottom of the interface can be used to identify configuration problems, such as invalid IP addresses or missing gateways.
 
@@ -105,6 +105,12 @@ The main networking concepts studied during the project were:
 
 * [Cloudflare — What is DNS?](https://www.cloudflare.com/learning/dns/what-is-dns/)
   Used to understand the role of **DNS** in computer networks.
+
+* https://www.cloudflare.com/learning/network-layer/what-is-a-router/
+
+* https://www.cloudflare.com/learning/network-layer/what-is-a-network-switch/
+
+* https://www.youtube.com/watch?v=htQXaoHTSmE
 
 * [Practical Networking — Subnetting Mastery](https://www.practicalnetworking.net/stand-alone/subnetting-mastery/)
   Used to study **subnetting, subnet masks, network addresses, broadcast addresses, and host ranges**.
