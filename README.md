@@ -150,12 +150,12 @@ For normal IPv4 subnets:
 - `/25` → 128 addresses, 126 usable host addresses
 - `/24` → 256 addresses, 254 usable host addresses
 
-`/31` and `/32` are special cases and should not be treated as normal subnets with network, host and broadcast addresses.
+`/31` and `/32` are special cases and should not be treated as normal subnets.
 
 
 ### Network, Host and Broadcast Addresses
 
-Every subnet has three important types of addresses:
+Every normal IPv4 subnet has three important types of addresses:
 
 - **Network address** — the first address of the subnet. It identifies the network itself.
 - **Usable host addresses** — the addresses between the network and broadcast addresses.
@@ -164,6 +164,10 @@ Every subnet has three important types of addresses:
 For example:
 
 `192.168.1.128/26`
+
+The subnet mask is:
+
+`255.255.255.192`
 
 The block size is:
 
@@ -178,118 +182,219 @@ Last host:     192.168.1.190
 Broadcast:     192.168.1.191
 ```
 
-### Core Mechanics Visualized
+### Hosts, Switches and Routers
 
-1. IP Address Anatomy (Network vs. Host)An IP address is split into a Network portion and a Host portion based on the Subnet Mask. Devices can only talk directly if they share the exact same Network ID.
+1. Hosts on the Same Network
 
-```text
-IP address:      192.168.1.50/24
-Subnet mask:     255.255.255.0
-
-                 NETWORK          HOST
-              ┌──────────────┬────────┐
-              │ 192.168.1    │  .50   │
-              └──────────────┴────────┘
-
-Network:       192.168.1.0
-First host:    192.168.1.1
-Last host:     192.168.1.254
-Broadcast:     192.168.1.255
-```
+Devices connected to the same network can communicate directly.
 
 ```
-192.168.1.130/26
+Host A                         Host B
+192.168.1.10/24               192.168.1.20/24
+     │                              │
+     └────────── Switch ────────────┘
 
-Mask: 255.255.255.192
-
-Group size:
-256 - 192 = 64
-
-Subnets:
-
-192.168.1.0   - 192.168.1.63
-192.168.1.64  - 192.168.1.127
-192.168.1.128 - 192.168.1.191  ← IP belongs here
-192.168.1.192 - 192.168.1.255
-
-Therefore:
-
-Network:    192.168.1.128
-First host: 192.168.1.129
-IP:         192.168.1.130
-Last host:  192.168.1.190
-Broadcast:  192.168.1.191
+Network: 192.168.1.0/24
 ```
 
-2. Default Gateways & Routers
+Both devices belong to:
 
-```text
- [Host A] (192.168.1.10/24)
-    │
-    ▼ (Wants to reach 10.0.0.5)
- [Local Switch]
-    │
-    ▼ 
- [Router] ── Interface 1 (Gateway): 192.168.1.254
-    │     ── Interface 2:            10.0.0.254
-    ▼ 
- [Remote Switch]
-    │
-    ▼ 
- [Host B] (10.0.0.5/24)
+`192.168.1.0/24`
+
+No router is required for their direct communication.
+
+2. Different Networks Require a Router
+
+A router connects different IP networks.
+
+```
+192.168.1.0/24                 10.0.0.0/24
+
+ Host A                          Host B
+192.168.1.10                    10.0.0.5
+     │                              │
+     │                              │
+     └── Switch ── Router ── Switch ┘
+                    │
+              ┌─────┴─────┐
+              │            │
+       192.168.1.254   10.0.0.254
 ```
 
-3. The Reverse Path Rule
-
-For communication to succeed, a valid return path must exist from the destination back to the source. This path may be provided by a directly connected route, a specific route, or a default route.
-
-```text
-Forward path:
-
-Host A ───────> Router ───────> Host B
-                   ✓
-
-
-Return path:
-
-Host A <─────── Router <─────── Host B
-                   ✓
-
-Both directions must have a valid path.
+The router has an interface in each network:
+```
+Interface 1: 192.168.1.254/24
+Interface 2: 10.0.0.254/24
 ```
 
+This allows the router to forward packets between the two networks.
 
----
+Internet access is not required for this. A router can connect private networks completely locally.
 
-### Why /30 is commonly used between routers
+### Default Gateway
 
-```markdown
-
-A `/30` subnet contains 4 addresses:
-
-    Network
-    Host
-    Host
-    Broadcast
+A default gateway is the router interface used by a host to reach destinations outside its local subnet.
 
 Example:
 
-    10.0.0.0/30
-
-    10.0.0.0  → Network
-    10.0.0.1  → Host
-    10.0.0.2  → Host
-    10.0.0.3  → Broadcast
-
-Therefore a point-to-point link can use:
-
-    Router A: 10.0.0.1/30
-    Router B: 10.0.0.2/30
-
-Both interfaces belong to the same subnet:
-
-    10.0.0.0/30
 ```
+Host A
+IP:      192.168.1.10/24
+Gateway: 192.168.1.254
+```
+
+Topology:
+
+```
+Host A
+192.168.1.10
+     │
+     ▼
+  Switch
+     │
+     ▼
+Router
+192.168.1.254
+     │
+     ▼
+10.0.0.254
+     │
+     ▼
+Host B
+10.0.0.5
+```
+
+When Host A wants to reach:
+`10.0.0.5`
+
+it sees that 10.0.0.5 is outside its local subnet and sends the packet to its default gateway:
+`192.168.1.254`
+
+### Router Interfaces and Links
+
+A router can have multiple interfaces, and each interface can belong to a different subnet.
+
+For example:
+
+```
+Router
+
+Interface 1 ── 192.168.1.254/24
+Interface 2 ── 10.0.0.1/30
+Interface 3 ── 172.16.0.1/24
+```
+
+The interfaces do not need to be in the same subnet.
+
+However, two interfaces directly connected by the same link must normally belong to the same subnet.
+
+
+```
+Router A                         Router B
+
+10.0.0.1/30 ─────── link ─────── 10.0.0.2/30
+
+             Same subnet:
+             10.0.0.0/30
+```
+
+### Point-to-Point Links and /30
+
+A /30 subnet contains four addresses:
+
+```
+10.0.0.0/30
+
+10.0.0.0  → Network
+10.0.0.1  → Host
+10.0.0.2  → Host
+10.0.0.3  → Broadcast
+```
+
+This leaves exactly two usable addresses, which makes /30 useful for a point-to-point connection between two routers.
+
+```
+Router A                         Router B
+10.0.0.1/30 ─────── link ─────── 10.0.0.2/30
+
+             10.0.0.0/30
+```
+
+### Routing
+
+A router uses a routing table to determine where packets should be sent.
+
+A simplified routing table can look like:
+
+```
+Destination       Next Hop
+192.168.1.0/24    directly connected
+10.0.0.0/24       192.168.1.2
+172.16.0.0/16     10.0.0.2
+0.0.0.0/0         192.168.1.1
+```
+
+#### Destination Network
+
+The destination network tells the router which network the packet should reach.
+
+#### Next Hop
+
+The next hop is the router/interface to which the packet should be forwarded next.
+
+The next hop must be reachable from the router's current interface.
+
+### Forward and Reverse Paths
+
+A common NetPractice mistake is creating a valid path in only one direction.
+
+Communication requires a valid route from the source to the destination and a valid route back.
+
+```
+Forward path:
+
+Host A ───────> Router A ───────> Router B ───────> Host B
+
+
+
+Reverse path:
+
+Host A <─────── Router A <─────── Router B <─────── Host B
+
+```
+
+If the forward path works but the destination has no route back, the communication fails.
+
+```
+Host A ───────> Host B
+                  ✓
+
+Host A <─────── Host B
+                  ✗
+```
+
+The return path may use:
+
+a directly connected network;
+a specific route;
+a default route.
+
+## Quick Problem-Solving Checklist
+
+When solving a level, ask these questions in order:
+
+1. What is the source?
+2. What is the destination?
+3. What subnet does each device belong to?
+4. Are the IP addresses valid host addresses?
+5. Are devices connected to the same link in the same subnet?
+6. If the destination is remote, what is the gateway?
+7. Does every router know the destination network?
+8. Is every next hop reachable?
+9. Can the destination route back to the source?
+10. Check again.
+
+This checklist is usually enough to solve most NetPractice configurations systematically.
 
 ## Resources
 
@@ -297,7 +402,7 @@ The resources below were used to study the concepts required for NetPractice. Ea
 
 ### Training and project resources
 
-- **42 NetPractice training interface** — the interactive environment used to configure and test all 10 network levels.
+- **42 NetPractice training interface** — interactive environment used to configure and test the 10 network levels.
 - **42 NetPractice subject / provided project files** — used to understand the project requirements, execution procedure, level format, and submission requirements.
 - **`run.sh`** — provided script used to start the local training interface.
 
@@ -318,8 +423,14 @@ The resources below were used to study the concepts required for NetPractice. Ea
 - [Cloudflare — What is a router?](https://www.cloudflare.com/learning/network-layer/what-is-a-router/)  
   Used to study **routers, their role in connecting different IP networks, and how routing tables are used to forward packets**.
 
+- [YouTube — Routing Table Tutorial](https://www.youtube.com/watch?v=CGmTvukObOw)  
+Used as a visual explanation of routing tables, destination networks, next hops, and packet forwarding.
+
+- [YouTube — Routing Table Tutorial](https://www.youtube.com/watch?v=pCcJFdYNamc)  
+Used as a visual explanation of the default gateway, including how a host forwards traffic destined for another network to its local router.
+
 - [Cloudflare — What is a network switch?](https://www.cloudflare.com/learning/network-layer/what-is-a-network-switch/)  
-  Used to understand **switches, local networks, Layer 2 communication, and the difference between switches and routers**.
+  Used to understand switches, local networks, and the difference between **Layer 2 switches** and **Layer 3 routers**.
 
 - [Cloudflare — What is DNS?](https://www.cloudflare.com/learning/dns/what-is-dns/)  
   Used to understand **DNS and the relationship between hostnames and IP addresses**. DNS was studied as supporting networking knowledge rather than as the main focus of NetPractice.
@@ -327,7 +438,10 @@ The resources below were used to study the concepts required for NetPractice. Ea
 - [Practical Networking — Subnetting Mastery](https://www.practicalnetworking.net/stand-alone/subnetting-mastery/)  
   Used extensively to study **subnet masks, CIDR notation, subnetting, network addresses, broadcast addresses, usable host ranges, and calculating subnets**.
 
-- [YouTube — routing table]( https://www.youtube.com/watch?v=CGmTvukObOw)
+
+
+- [Geeksforgeeks — OSI Layers](https://www.geeksforgeeks.org/computer-networks/open-systems-interconnection-model-osi/)  
+Used to study the **OSI model and its seven layers**, with particular attention to Layer 2 (Data Link) and Layer 3 (Network), which are relevant to switches, routers, MAC addresses, and IP addressing.
 
 ### Subnetting practice tools
 
@@ -353,25 +467,6 @@ They were used to:
 - Help analyze and understand mistakes encountered while solving the NetPractice exercises.
 - Explain routing concepts such as **next hops, communication between different subnets, default routes, and reverse paths**.
 - Reinforce concepts studied through the external resources listed in this README.
+- Help organize, structure, proofread, and improve the README, including the description of the project, networking explanations, quick-reference material, and resource descriptions.
 
 AI-generated explanations were reviewed and used as a learning aid. The final configurations were completed, tested, and verified through the NetPractice training interface.
-
-
-
-
-
-The project covers the following networking concepts:
-
-- **TCP/IP addressing** — identifying devices and networks using IPv4 addresses.
-- **Subnet masks** — determining which part of an IPv4 address identifies the network and which part identifies the host.
-- **CIDR notation** — representing subnet masks using prefixes such as `/24`, `/26`, `/30`, etc.
-- **Subnetting** — dividing an address space into smaller networks.
-- **Network addresses** — identifying the first address of a subnet, which represents the subnet itself.
-- **Host addresses** — identifying usable addresses assigned to devices such as hosts and router interfaces.
-- **Broadcast addresses** — identifying the last address of an IPv4 subnet, which is reserved for broadcast communication.
-- **Default gateways** — forwarding traffic from a local subnet toward destinations outside that subnet.
-- **Routers** — connecting different IP networks and forwarding packets according to routing tables.
-- **Routing tables** — associating destination networks with next hops.
-- **Switches** — connecting devices within a local network and forwarding traffic at the data-link layer.
-- **OSI layers** — understanding the seven-layer networking model, especially Layer 2 (Data Link) and Layer 3 (Network).
-- **Reverse paths** — understanding that successful communication requires a return path from the destination to the source.
