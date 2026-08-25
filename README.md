@@ -1,5 +1,7 @@
 *This project has been created as part of the 42 curriculum by aunoguei.*
 
+# NetPractice
+
 ## Description
 
 NetPractice is a practical networking exercise from the 42 curriculum designed to introduce the fundamentals of computer networking.
@@ -49,45 +51,86 @@ The training interface contains 10 levels.
 4. Use `Check again` to verify the configuration.
 5. When the level is successfully completed, use `Get my config` to export the configuration.
 6. Save the exported configuration file in the repository before moving to the `Next level`.
-7. Alternatively, use the Evaluation tab to practice with random configurations
+7. Alternatively, use the `Evaluation` tab to practice with random configurations.
 
 
 The messages and logs displayed by the interface can be used to understand configuration problems, such as invalid addresses, incorrect subnet masks, missing routes, incorrect next hops, or missing reverse paths.
 
 ### Submission
 
-The repository must contain **10 exported configuration files**, one for each level.
+The repository must contain:
 
-All 10 configuration files must be placed at the **root of the repository** and must not be empty.
+- 10 exported configuration files, one for each level.
+- All 10 configuration files placed at the root of the repository.
+- All configuration files must be non-empty.
+- This README.md file at the root of the repository.
 
-The repository must also contain this `README.md` file at its root.
+During the defense, three random levels may be selected and must be successfully completed within the allocated time.
 
-During the defense, three random levels may be selected and must be successfully completed within the allocated time. External tools are not allowed during the evaluation, except for simple calculators such as `bc` when permitted by the evaluation rules.
+External tools are not allowed during the evaluation, except for simple calculators such as bc when permitted by the evaluation rules.
 
-## Networking Concepts Studied
+## Networking Fundamentals
 
-The project covers the following networking concepts:
+  1. IPv4 Addresses
 
-- **TCP/IP addressing** — identifying devices and networks using IPv4 addresses.
-- **Subnet masks** — determining which part of an IPv4 address identifies the network and which part identifies the host.
-- **CIDR notation** — representing subnet masks using prefixes such as `/24`, `/26`, `/30`, etc.
-- **Subnetting** — dividing an address space into smaller networks.
-- **Network addresses** — identifying the first address of a subnet, which represents the subnet itself.
-- **Host addresses** — identifying usable addresses assigned to devices such as hosts and router interfaces.
-- **Broadcast addresses** — identifying the last address of an IPv4 subnet, which is reserved for broadcast communication.
-- **Default gateways** — forwarding traffic from a local subnet toward destinations outside that subnet.
-- **Routers** — connecting different IP networks and forwarding packets according to routing tables.
-- **Routing tables** — associating destination networks with next hops.
-- **Switches** — connecting devices within a local network and forwarding traffic at the data-link layer.
-- **OSI layers** — understanding the seven-layer networking model, especially Layer 2 (Data Link) and Layer 3 (Network).
-- **Reverse paths** — understanding that successful communication requires a return path from the destination to the source.
+An IPv4 address consists of four octets: 
+
+```
+192.168.1.50
+ │    │  │ │
+ │    │  │ └── Host
+ │    │  └───── Network
+ └────┴──────── Network
+```
+
+However, the exact division between the network portion and the host portion is determined by the subnet mask.
+
+```
+IP address:   192.168.1.50/24
+Mask:         255.255.255.0
+
+              NETWORK          HOST
+           ┌──────────────┬────────┐
+           │ 192.168.1    │  .50   │
+           └──────────────┴────────┘
+```
+
+Therefore:
+
+```
+Network:      192.168.1.0
+First host:   192.168.1.1
+Last host:    192.168.1.254
+Broadcast:    192.168.1.255
+```
+
+Two devices can communicate directly when their IP addresses belong to the same subnet.
+
+If they belong to different subnets, a router is required.
 
 
-## Quick Reference
+2. Subnet Masks and CIDR
 
-### Subnetting Cheat Sheet
+A subnet mask determines which bits belong to the network and which belong to the host.
+
+CIDR notation represents the number of network bits.
+
+Examples:
+
+/24 = 255.255.255.0
+/25 = 255.255.255.128
+/26 = 255.255.255.192
+/27 = 255.255.255.224
+/28 = 255.255.255.240
+/29 = 255.255.255.248
+/30 = 255.255.255.252
+
+The larger the CIDR prefix, the smaller the subnet.
+
+3. Subnetting Cheat Sheet
 
 The block size determines the increment between subnet network addresses.
+
 
 | **Block Size** | `128` | `64` | `32` | `16` | `8` | `4` | `2` | `1` |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -312,3 +355,23 @@ They were used to:
 - Reinforce concepts studied through the external resources listed in this README.
 
 AI-generated explanations were reviewed and used as a learning aid. The final configurations were completed, tested, and verified through the NetPractice training interface.
+
+
+
+
+
+The project covers the following networking concepts:
+
+- **TCP/IP addressing** — identifying devices and networks using IPv4 addresses.
+- **Subnet masks** — determining which part of an IPv4 address identifies the network and which part identifies the host.
+- **CIDR notation** — representing subnet masks using prefixes such as `/24`, `/26`, `/30`, etc.
+- **Subnetting** — dividing an address space into smaller networks.
+- **Network addresses** — identifying the first address of a subnet, which represents the subnet itself.
+- **Host addresses** — identifying usable addresses assigned to devices such as hosts and router interfaces.
+- **Broadcast addresses** — identifying the last address of an IPv4 subnet, which is reserved for broadcast communication.
+- **Default gateways** — forwarding traffic from a local subnet toward destinations outside that subnet.
+- **Routers** — connecting different IP networks and forwarding packets according to routing tables.
+- **Routing tables** — associating destination networks with next hops.
+- **Switches** — connecting devices within a local network and forwarding traffic at the data-link layer.
+- **OSI layers** — understanding the seven-layer networking model, especially Layer 2 (Data Link) and Layer 3 (Network).
+- **Reverse paths** — understanding that successful communication requires a return path from the destination to the source.
